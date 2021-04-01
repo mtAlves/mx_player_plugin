@@ -26,16 +26,38 @@ public class MxPlayerPlugin implements MethodCallHandler {
   }
 
   @TargetApi(16)
-  private void openMx(String url,String subUrl){
-    Parcelable[] parcels = {Uri.parse(subUrl)};
+  private void openMx(String url, String referer, String agent){
     Intent intent = new Intent(Intent.ACTION_VIEW);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
       intent.setPackage("com.mxtech.videoplayer.ad");
     }
     intent.setData(Uri.parse(url));
-    intent.putExtra("subs", parcels);
+    String[] headers = new String[] {
+      "User-Agent", agent, "Referer", referer };
+		intent.putExtra("headers", headers);
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
+    try {
+      if (null != intent)
+        mRegistrar.context().startActivity(intent);
+    } catch (ActivityNotFoundException e) {
+      
+    }
+  }
+
+  @TargetApi(16)
+  private void openWithWebVideoCast(String url, String referer, String agent){
+    Intent intent = new Intent(Intent.ACTION_VIEW);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
+      intent.setPackage("com.instantbits.cast.webvideo");
+    }
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+    intent.setDataAndType(Uri.parse(url), "video/*");
+    String[] headers = new String[] {
+      "User-Agent", agent, "Referer", referer };
+		intent.putExtra("headers", headers);
 
     try {
       if (null != intent)
@@ -68,7 +90,10 @@ public class MxPlayerPlugin implements MethodCallHandler {
   public void onMethodCall(MethodCall call, Result result) {
 
     if(call.method.equals("openWithMxPlayer")){
-      openMx(call.argument("url").toString(),call.argument("subUrl").toString());
+      openMx(call.argument("url").toString(),call.argument("referer").toString(),call.argument("agent").toString());
+    }
+    else if(call.method.equals("openWithWebVideoCast")){
+      openWithWebVideoCast(call.argument("url").toString(),call.argument("referer").toString(),call.argument("agent").toString());
     }
     else if(call.method.equals("openWithVlcPlayer")){
       openVlc(call.argument("url").toString());
