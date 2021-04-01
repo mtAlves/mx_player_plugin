@@ -8,7 +8,11 @@ A new Flutter plugin to open video files using mx player with subtitle and VLC p
 ## Usage
 
 ```dart
-await PlayerPlugin.openWithMxPlayer(String url, String subUrl);
+await PlayerPlugin.openWithMxPlayer(String url, String referer, String agent);
+```
+
+```dart
+await PlayerPlugin.openWithWebVideoCast(String url, String referer, String agent);
 ```
 
 ```dart
